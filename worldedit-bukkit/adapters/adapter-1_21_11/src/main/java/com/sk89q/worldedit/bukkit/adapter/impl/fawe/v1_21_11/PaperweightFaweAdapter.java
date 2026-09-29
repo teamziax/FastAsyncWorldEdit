@@ -187,8 +187,20 @@ public final class PaperweightFaweAdapter extends FaweAdapter<net.minecraft.nbt.
                 yield new EnumProperty(enumProperty.getName(), enumProperty.getPossibleValues().stream()
                         .map(StringRepresentable::getSerializedName).collect(Collectors.toCollection(ArrayList::new)));
             }
-            default -> throw new IllegalArgumentException("FastAsyncWorldEdit needs an update to support " + property.getClass().getSimpleName());
+            default -> adaptUnknownProperty(property);
         };
+    }
+
+    /**
+     * Server forks and mods can register block properties that aren't one of the vanilla property types.
+     * Every property is a fixed set of values with string names, so represent unknown ones as an enum property.
+     */
+    private static <T extends Comparable<T>> Property<?> adaptUnknownProperty(
+            net.minecraft.world.level.block.state.properties.Property<T> property
+    ) {
+        return new EnumProperty(property.getName(), property.getPossibleValues().stream()
+                .map(property::getName)
+                .collect(Collectors.toCollection(ArrayList::new)));
     }
 
     private static String getEntityId(Entity entity) {

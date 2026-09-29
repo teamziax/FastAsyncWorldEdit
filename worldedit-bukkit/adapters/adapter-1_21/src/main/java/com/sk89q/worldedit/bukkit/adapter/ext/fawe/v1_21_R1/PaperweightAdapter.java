@@ -588,9 +588,15 @@ public final class PaperweightAdapter implements BukkitImplAdapter<net.minecraft
                     } else if (state instanceof net.minecraft.world.level.block.state.properties.IntegerProperty) {
                         return new IntegerProperty(state.getName(), ImmutableList.copyOf(state.getPossibleValues()));
                     } else {
-                        throw new IllegalArgumentException("WorldEdit needs an update to support " + state
-                                .getClass()
-                                .getSimpleName());
+                        // allow registration of non-vanilla property types, represent unknown ones as an enum property
+                        return new EnumProperty(
+                                state.getName(),
+                                new ArrayList<>((List<String>) state
+                                        .getPossibleValues()
+                                        .stream()
+                                        .map(value -> state.getName((Comparable) value))
+                                        .toList())
+                        );
                     }
                 }
             });
